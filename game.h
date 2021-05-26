@@ -3,6 +3,7 @@
 #include "glad.h"
 #include "sprite_renderer.h"
 #include "ball_object.h"
+#include "swarm_object.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
  
@@ -17,14 +18,15 @@ enum GameState {
 
 // Класс Game содержит все связанные с игрой параметры состояния и различный функционал. 
 class Game{
-    SpriteRenderer *Renderer = nullptr;
-    BallObject *Ball = nullptr; 
+    SpriteRenderer* Renderer = nullptr;
+    //BallObject *Ball = nullptr; 
+    SwarmObject* Swarm = nullptr;
 
 public: 
     // Игровое состояние
     GameState State;	
     bool Keys[1024];
-    unsigned int Width, Height;
+    int Width, Height;
      
     Game(unsigned int width, unsigned int height);
     ~Game();

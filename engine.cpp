@@ -13,8 +13,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
 // settings
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 600;
+const unsigned int SCREEN_WIDTH = 1024;
+const unsigned int SCREEN_HEIGHT = 768;
 
 Game Breakout(SCREEN_WIDTH, SCREEN_HEIGHT);
  
@@ -97,6 +97,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // Убеждаемся, что окно просмотра соответствует новым размерам окна.  
-    // Обратите внимание, что ширина и высота будут значительно больше, чем указано, на Retina-дисплеях
-    glViewport(0, 0, width, height);
+    // Обратите внимание, что ширина и высота будут значительно больше, чем указано, на Retina-дисплеях    
+    glViewport(0, 0, width, height);    
 }
