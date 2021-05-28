@@ -4,44 +4,137 @@
 //AgentObject::AgentObject() 
 //    : GameObject(), Radius(12.5f) {}
  
-AgentObject::AgentObject(glm::vec2 pos, float radius, glm::vec2 velocity)
-    : GameObject(pos, glm::vec2(radius, radius), glm::vec3(1.0f), velocity), Radius(radius) {}
+AgentObject::AgentObject(std::vector<ColonyObject>& colonies, glm::vec2 pos, float radius, glm::vec2 velocity, int colony_aim_index)
+    : GameObject(pos, glm::vec2(radius, radius), colonies[colony_aim_index].color, velocity), 
+      Radius(radius),
+      colonies(colonies),
+      colony_distance((int) colonies.size(), 0),
+      colony_aim_index(colony_aim_index)
+{}
  
-void AgentObject::Move(float dt, unsigned int window_width, unsigned int window_height)
-{    
-    //std::cout << "Vel " << this->Velocity.x << " " << this->Velocity.y << std::endl;
-    //std::cout << "Pos " << this->Position.x << " " << this->Position.y << std::endl;    
 
-    glm::vec2 dv = glm::vec2(std::rand() % 1024 - 512, std::rand() % 768 - 384) * 0.08f;    
-    this->Position += (this->Velocity + dv) * dt;
- 
-    // Затем проверяем, находится ли он за пределами границ окна, и если да, то изменяем его скорость и восстанавливаем правильное положение
-    if (this->Position.x - Size.x <= 0.0f)
+bool AgentObject::handleColonyCollision() 
+{
+    for (auto i = 0; i < colonies.size(); ++i) 
     {
-        this->Velocity.x = -this->Velocity.x;
-        this->Position.x = Size.x;
+        if (colonies[i].isAgentCollision(this->position)) 
+        {
+            //std::cout << "collision detected" << std::endl;           
+            
+            this->velocity.x = -this->velocity.x;
+            this->velocity.y = -this->velocity.y;
+
+            this->colony_distance[i] = 0;
+
+            if (i == colony_aim_index) 
+            {
+                colony_aim_index = (colony_aim_index + 1) % colonies.size();
+                color = colonies[colony_aim_index].color;
+            }
+
+            return true;
+        }
+        
     }
-    else if (this->Position.x + this->Size.x >= window_width)
+    return false;
+}
+
+bool AgentObject::handleBorderCollision(unsigned int window_width, unsigned int window_height) 
+{
+    bool isBorderCollision = false;
+    if (this->position.x - size.x <= 0.0f)
     {
-        this->Velocity.x = -this->Velocity.x;
-        this->Position.x = window_width - this->Size.x;
+        this->velocity.x = -this->velocity.x;
+        this->position.x = size.x;
+        isBorderCollision = true;
+    }
+    else if (this->position.x + this->size.x >= window_width)
+    {
+        this->velocity.x = -this->velocity.x;
+        this->position.x = window_width - this->size.x;
+        isBorderCollision = true;
     }
 
-    if (this->Position.y - Size.y <= 0.0f)
+    if (this->position.y - size.y <= 0.0f)
     {
-        this->Velocity.y = -this->Velocity.y;
-        this->Position.y = Size.y;
+        this->velocity.y = -this->velocity.y;
+        this->position.y = size.y;
+        isBorderCollision = true;
     } 
-    else if (this->Position.y + this->Size.y >= window_height) 
+    else if (this->position.y + this->size.y >= window_height) 
     {
-        this->Velocity.y = -this->Velocity.y;
-        this->Position.y = window_height - this->Size.y; 
+        this->velocity.y = -this->velocity.y;
+        this->position.y = window_height - this->size.y; 
+        isBorderCollision = true;        
     }
+    return isBorderCollision;
+}
+
+void AgentObject::updateColonyDistances() 
+{
+    for (auto i = 0; i < colony_distance.size(); ++i) 
+    {
+        colony_distance[i] += glm::length(this->velocity); 
+    }    
+}
+
+void AgentObject::printDistances() 
+{
+    std::cout << this << ": ";
+    for (auto i = 0; i < colony_distance.size(); ++i) 
+    {
+        std::cout << colony_distance[i] << " ";
+    }
+    std::cout << std::endl;
+}
+
+void AgentObject::printState()
+{
+    std::cout << "Pos: (" << position.x << ", " << position.y << ") ";
+    std::cout << "Vel: (" << velocity.x << ", " << velocity.y << ") ";
+    std::cout << "Aim: (" << colony_aim_index << ")" << std::endl;
+}
+
+glm::ivec2 AgentObject::broadCastDistance(int colony_info_index) 
+{    
+    return glm::ivec2(colony_info_index, colony_distance[colony_info_index] + 50);
+}
+
+void AgentObject::updateDirection(int colony_num, int broadcasted_distance, glm::vec2 pos, float velocity_factor) 
+{
+    if ((glm::length(pos - position) < 50.0f) && (glm::length(pos - position) > 1.0f))
+    {    
+        if (broadcasted_distance < colony_distance[colony_num])
+        {
+            colony_distance[colony_num] = broadcasted_distance;        
+        }        
+        if (colony_num == colony_aim_index) 
+        {        
+            velocity = glm::normalize(pos - position) * velocity_factor;            
+        }
+        //printState();
+    }      
+}
+
+void AgentObject::restoreColor() 
+{
+    this->color = colonies[colony_aim_index].color;
+}
+
+void AgentObject::move(float dt, unsigned int window_width, unsigned int window_height)
+{   
+    //добавить вращение вектора на небольшой угол            
+    //float alpha = (std::rand() / 30.0f - 15.0f) * 3.14 / 180; 
+    this->position += this->velocity * dt;
+
+    updateColonyDistances();
+    handleColonyCollision();
+    handleBorderCollision(window_width, window_height);
+    //printDistances();
 }
  
-// Сбрасываем мяч в стартовое положение (если мяч находится за пределами границ окна)
-void AgentObject::Reset(glm::vec2 position, glm::vec2 velocity)
+void AgentObject::reset(glm::vec2 position, glm::vec2 velocity)
 {
-    this->Position = position;
-    this->Velocity = velocity;    
+    this->position = position;
+    this->velocity = velocity;    
 }

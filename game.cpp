@@ -28,10 +28,10 @@ void Game::Init()
     ResourceManager::GetShader("sprite").Use();
     ResourceManager::GetShader("sprite").SetMatrix4("projection", projection);
     
-
     // Установка специфичных для рендеринга элементов управления
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
-    Swarm = new SwarmObject(20, 9.0f);
+    
+    Swarm = new SwarmObject(glm::ivec4(0, 0, Width, Height), 150, 4.0f, 3, 20.0f);
 }
 
 void Game::Stop() 
@@ -43,7 +43,7 @@ void Game::Stop()
 void Game::Update(float dt) 
 {    
     if (this->State == GAME_ACTIVE) {        
-        Swarm->Move(dt, Width, Height);
+        Swarm->move(dt);
     }
 }
  
@@ -62,5 +62,5 @@ void Game::ProcessInput(float dt)
 void Game::Render() 
 {
     //std::cout << "Scene render" << std::endl;                            
-    Swarm->Draw(*Renderer);
+    Swarm->draw(*Renderer);
 }
