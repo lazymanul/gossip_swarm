@@ -13,6 +13,7 @@ class AgentObject : public GameObject
         std::vector<ColonyObject>& colonies;
         
         int colony_aim_index = 0;
+        
 
         bool handleColonyCollision();
         bool handleBorderCollision(unsigned int window_width, unsigned int window_height);
@@ -20,6 +21,8 @@ class AgentObject : public GameObject
     public:
         // Состояние мяча	
         float Radius;    
+        bool inBroadcatingNetwork = false;
+        
     
         // Конструкторы
         //AgentObject();
@@ -28,8 +31,8 @@ class AgentObject : public GameObject
         // Перемещаем мяч, удерживая его в пределах границ окна (за исключением нижнего края); возвращаем новую позицию
         void move(float dt, unsigned int window_width, unsigned int window_height);
         
-        glm::ivec2 broadCastDistance(int colony_info_index);        
-        void updateDirection(int colony_num, int broadcasted_distance, glm::vec2 pos, float velocity_factor);
+        float broadCastDistance(int colony_index);        
+        void updateDirection(int colony_num, float broadcasted_distance, glm::vec2 pos, float velocity_factor);
 
     
         // Возвращаем мяч в исходное состояние с заданным положением и скоростью

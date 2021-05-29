@@ -1,6 +1,5 @@
 #include "game.h"
 #include "resource_manager.h"
-#include "ball_object.h"
 #include <iostream>
  
 
@@ -31,7 +30,7 @@ void Game::Init()
     // Установка специфичных для рендеринга элементов управления
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
     
-    Swarm = new SwarmObject(glm::ivec4(0, 0, Width, Height), 150, 4.0f, 3, 20.0f);
+    Swarm = new SwarmObject(glm::ivec4(0, 0, Width, Height), 12, 4.0f, 3, 40.0f);
 }
 
 void Game::Stop() 

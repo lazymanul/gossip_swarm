@@ -95,24 +95,26 @@ void AgentObject::printState()
     std::cout << "Aim: (" << colony_aim_index << ")" << std::endl;
 }
 
-glm::ivec2 AgentObject::broadCastDistance(int colony_info_index) 
+float AgentObject::broadCastDistance(int colony_index) 
 {    
-    return glm::ivec2(colony_info_index, colony_distance[colony_info_index] + 50);
+    return colony_distance[colony_index] + 100;
 }
 
-void AgentObject::updateDirection(int colony_num, int broadcasted_distance, glm::vec2 pos, float velocity_factor) 
+void AgentObject::updateDirection(int colony_num, float broadcasted_distance, glm::vec2 pos, float velocity_factor) 
 {
-    if ((glm::length(pos - position) < 50.0f) && (glm::length(pos - position) > 1.0f))
+    if ((glm::length(pos - position) < 100.0f) && (glm::length(pos - position) > 1.0f))
     {    
         if (broadcasted_distance < colony_distance[colony_num])
         {
-            colony_distance[colony_num] = broadcasted_distance;        
-        }        
-        if (colony_num == colony_aim_index) 
-        {        
-            velocity = glm::normalize(pos - position) * velocity_factor;            
+            colony_distance[colony_num] = broadcasted_distance;
+            
+            if (colony_num == colony_aim_index) 
+            {        
+                velocity = glm::normalize(pos - position) * velocity_factor;
+                printState();         
+            }
+            
         }
-        //printState();
     }      
 }
 
@@ -126,7 +128,8 @@ void AgentObject::move(float dt, unsigned int window_width, unsigned int window_
     //добавить вращение вектора на небольшой угол            
     //float alpha = (std::rand() / 30.0f - 15.0f) * 3.14 / 180; 
     this->position += this->velocity * dt;
-
+    this->inBroadcatingNetwork = false;
+    
     updateColonyDistances();
     handleColonyCollision();
     handleBorderCollision(window_width, window_height);

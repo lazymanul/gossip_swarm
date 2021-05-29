@@ -1,4 +1,5 @@
 #include "swarm_object.h"
+#include "broadcasting_network.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cstdlib>
@@ -15,6 +16,7 @@ SwarmObject::SwarmObject(const glm::ivec4& world_frame, int swarm_size, float ag
     }
 
     velocity_factor = world_frame[3] / (agent_radius * agent_radius);
+    
 
     for (auto i = 0; i < swarm_size; ++i) 
     {
@@ -31,31 +33,42 @@ void SwarmObject::move(float dt)
     // for (auto i = 0; i < broadcating; ++i)
     // {        
         float currentTime = glfwGetTime();
-        if (currentTime - lastBroadcastTime > 0.1f)
+        if (currentTime - lastBroadcastTime > 2.0f)
         {
-            
 
-            //broadcasting_agent = std::rand() % swarm_size;
-            //glm::ivec2 distance_data = swarm[broadcasting_agent].broadCastDistance();
+            
+            // int broadcasting_agent = std::rand() % swarm_size;
+            // float distance = swarm[broadcasting_agent].broadCastDistance(colony_index);            
             //swarm[broadcasting_agent].color = glm::vec3(0.0f, 1.0f, 0.0f);
-            int colony_info_index = std::rand() % num_colonies;
-            for (auto i = 0; i < swarm_size; ++i) 
-            {   
-                glm::ivec2 distance_data = swarm[i].broadCastDistance(colony_info_index);
+
+            //стоит попробовать инкрементальное обновление по типу остовного дерева
+            /* for (auto i = 0; i < swarm_size; ++i) 
+            {                   
+                float distance = swarm[i].broadCastDistance(colony_index);
                 for (auto it = std::begin(swarm); it != std::end(swarm); ++it) 
                 {
-                    it->updateDirection(distance_data[0], distance_data[1], swarm[i].position, velocity_factor);
+                    it->updateDirection(colony_index, distance, swarm[i].position, velocity_factor);
                 }                
-            }
+            }*/
+            
+                int colony_index = std::rand() % num_colonies;
+                int agent_index = std::rand() % swarm_size;
+                BroadcastingNetwork broadNetwork(swarm_size);
+                swarm[agent_index].color = glm::vec3(0, 1, 0);
+                broadNetwork.buildBroadcastingNetwork(swarm, agent_index, colony_index, 250.0f);
+                
+            
+            //broadNetwork.printGraph();
+
             lastBroadcastTime = currentTime;
         }
 
         
-    // }
-    
+    // }    
     for (auto it = std::begin(swarm); it != std::end(swarm); ++it) 
     {
-        it->move(dt, world_frame[2], world_frame[3]);
+        it->move(dt, world_frame[2], world_frame[3]); 
+        if (currentTime - lastBroadcastTime > 0.5f) it->restoreColor();       
     }
 }
 
