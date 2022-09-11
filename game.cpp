@@ -29,8 +29,8 @@ void Game::Init()
     
     // Установка специфичных для рендеринга элементов управления
     Renderer = new SpriteRenderer(ResourceManager::GetShader("sprite"));
-    
-    Swarm = new SwarmObject(glm::ivec4(0, 0, Width, Height), 12, 4.0f, 3, 40.0f);
+    std::srand(14);
+    Swarm = new SwarmObject(glm::ivec4(0, 0, Width, Height), 280, 4.0f, 3, 40.0f);
 }
 
 void Game::Stop() 

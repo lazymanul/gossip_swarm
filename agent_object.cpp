@@ -102,7 +102,7 @@ float AgentObject::broadCastDistance(int colony_index)
 
 void AgentObject::updateDirection(int colony_num, float broadcasted_distance, glm::vec2 pos, float velocity_factor) 
 {
-    if ((glm::length(pos - position) < 100.0f) && (glm::length(pos - position) > 1.0f))
+    if ((glm::length(pos - position) < 80.0f) && (glm::length(pos - position) > 1.0f))
     {    
         if (broadcasted_distance < colony_distance[colony_num])
         {
@@ -111,7 +111,7 @@ void AgentObject::updateDirection(int colony_num, float broadcasted_distance, gl
             if (colony_num == colony_aim_index) 
             {        
                 velocity = glm::normalize(pos - position) * velocity_factor;
-                printState();         
+                //printState();         
             }
             
         }
